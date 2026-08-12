@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-finance"
+version = "0.1.0"
+description = "Agentic Finance: a multi-agent, risk-mitigated, explainable trading framework with configurable small/large language models."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Thejeswee N" }]
+dependencies = [
+    "python-dotenv>=1.0",
+    "requests>=2.31",
+    "yfinance>=0.2",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "langchain-google-genai>=2.0",   # Gemini backend (imported lazily)
+]
+
+[project.optional-dependencies]
+# Explainability layer (surrogate + SHAP).
+xai = [
+    "scikit-learn>=1.5",
+    "shap>=0.46",
+]
+# Figure generation.
+reporting = [
+    "matplotlib>=3.8",
+]
+# Interactive dashboard UI.
+ui = [
+    "streamlit>=1.36",
+    "plotly>=5.22",
+]
+# Optional semantic-embedding upgrade for the RAG layer (default is the
+# dependency-free hashing embedder; enable with AGENTIC_RAG_EMBEDDER=st).
+rag = [
+    "sentence-transformers>=3.0",
+]
+# Everything, for development.
+dev = [
+    "pytest>=8.0",
+    "scikit-learn>=1.5",
+    "shap>=0.46",
+    "matplotlib>=3.8",
+    "streamlit>=1.36",
+    "plotly>=5.22",
+    "sentence-transformers>=3.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["agentic_finance*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "unit: fast isolated unit tests",
+    "integration: tests requiring external services",
+    "smoke: quick sanity-check tests",
+]
+filterwarnings = ["ignore::DeprecationWarning"]

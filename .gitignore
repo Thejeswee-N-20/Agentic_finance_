@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+
+# Secrets — never commit real keys
+.env
+
+# Generated at runtime
+data/                     # local SEC filing index
+reports/                  # figures and run output
+agentic_finance/_cacerts/ # machine-specific certificate bundle
+*.log
+
+# Model weights (shared separately — too large for GitHub)
+fine-tuned-slm/*.gguf
+fine-tuned-slm/out/
+
+# OS
+.DS_Store
+Thumbs.db
