@@ -11,10 +11,16 @@ dist/
 # Secrets — never commit real keys
 .env
 
-# Generated at runtime
-data/                     # local SEC filing index
-reports/                  # figures and run output
-agentic_finance/_cacerts/ # machine-specific certificate bundle
+# Generated at runtime.
+# Note: .gitignore has no inline comments - a trailing "# ..." becomes part of
+# the pattern and silently stops it matching. Keep comments on their own lines.
+
+# local SEC filing index
+data/
+# figures and run output
+reports/
+# machine-specific certificate bundle, regenerated on first run
+agentic_finance/_cacerts/
 *.log
 
 # Model weights (shared separately — too large for GitHub)
