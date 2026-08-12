@@ -21,7 +21,7 @@ into a properly sized order. Every decision comes with a plain-English explanati
 5. [Check that it works](#5-check-that-it-works)
 6. [Run the app](#6-run-the-app)
 7. [Optional: add the AI model (Ollama)](#7-optional-add-the-ai-model-ollama)
-8. [Optional: API keys](#8-optional-api-keys)
+8. [News: Yahoo (free) or Tavily (optional key)](#8-news-yahoo-free-or-tavily-optional-key)
 9. [Using the app](#9-using-the-app)
 10. [Running the experiments](#10-running-the-experiments)
 11. [Troubleshooting](#11-troubleshooting)
@@ -254,23 +254,66 @@ Wait for a reply, then type `/bye` to exit. The model now stays loaded.
 
 ---
 
-## 8. Optional: API keys
+## 8. News: Yahoo (free) or Tavily (optional key)
 
-Only needed for two extra features. The app works fine without them.
+The system reads news headlines from one of two sources. **You do not need an account
+or an API key** — Yahoo works out of the box.
 
-Open your `.env` file and add:
+### Option A — Yahoo (default, free, no account)
+
+This is already set in `.env.example`, so if you copied that file you are done. Just
+confirm your `.env` contains:
 
 ```bash
-# Historical news search — free developer account at tavily.com
-TAVILY_NEWS_API_KEY=tvly-...
-
-# Only if you want to compare against Google's cloud AI
-GOOGLE_API_KEY=...
+AGENTIC_NEWS_PROVIDER=yahoo
 ```
 
-Without a Tavily key the app falls back to free Yahoo headlines. Those work for
-today's news but cannot be filtered by date, so they are unsuitable for historical
-backtests.
+Yahoo gives you recent headlines for any stock, US or Indian, at no cost. The
+sentiment and news-reasoning agents work normally with it.
+
+Its one limitation: headlines cannot be filtered by date, so it is fine for a live
+recommendation but not suitable for a *historical* news backtest (you would be
+showing the system articles from after the decision date).
+
+### Option B — Tavily (free key, adds date-filtered news)
+
+Only worth doing if you want to run the historical news-driven backtest.
+
+1. Sign up free at <https://tavily.com> (no card required, 1,000 searches/month)
+2. Copy your key — it starts with `tvly-`
+3. In `.env`, comment out the Yahoo line and use these two instead:
+
+```bash
+# AGENTIC_NEWS_PROVIDER=yahoo
+AGENTIC_NEWS_PROVIDER=tavily
+TAVILY_NEWS_API_KEY=tvly-your-key-here
+```
+
+> ⚠️ **Important:** if you set `AGENTIC_NEWS_PROVIDER=tavily` but leave the key blank,
+> you will get **no headlines at all**. Either provide the key, or switch the line back
+> to `yahoo`.
+
+### Checking which one is active
+
+```bash
+python -c "import agentic_finance; from agentic_finance.news import news_provider, get_headlines; print('provider:', news_provider()); print('headlines:', len(get_headlines('AAPL stock', limit=8)))"
+```
+
+Expected output:
+
+```
+provider: yahoo
+headlines: 8
+```
+
+If headlines is `0`, see the troubleshooting section below.
+
+### One more optional key
+
+```bash
+# Only if you want to compare against Google's cloud AI instead of a local model
+GOOGLE_API_KEY=...
+```
 
 Company filings come from the public SEC EDGAR database and need **no key**.
 
@@ -376,6 +419,23 @@ The AI model was cold. See Step 7.4 to warm it up. Later requests are much faste
 **`ollama: command not found`**
 Ollama is installed but your terminal has not picked it up. Close and reopen the
 terminal.
+
+**No headlines appear (the "Headlines used" dropdown shows 0)**
+First check you are expanding the dropdown — headlines are collapsed by default under
+`📰 Headlines used (8)` in the Recommendation tab. If it genuinely says `(0)`, open
+`.env` and make sure it reads:
+
+```bash
+AGENTIC_NEWS_PROVIDER=yahoo
+```
+
+The usual cause is `AGENTIC_NEWS_PROVIDER=tavily` with no key filled in — the app then
+asks Tavily, which rejects the request, and no headlines come back. Switching to
+`yahoo` fixes it with no account needed. Restart the app after editing `.env`.
+
+Note that zero headlines does **not** break the system: the price-trend and
+fundamentals agents still run and you still get a full recommendation with a position
+size and stop-loss. The sentiment and news cards simply show "skipped".
 
 **A company search finds nothing**
 The company may have been renamed. For example, Zomato is now listed as `ETERNAL.NS`.
