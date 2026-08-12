@@ -50,12 +50,26 @@ class YahooNewsProvider:
                                         source=source or netloc, snippet=""))
         return articles
 
+    @staticmethod
+    def _symbol(query: str) -> str:
+        """Reduce a free-text news query to the bare ticker Yahoo expects.
+
+        Callers phrase queries for a search API (``"AAPL stock"``), which Tavily
+        handles but ``yf.Ticker`` does not — it needs the symbol alone, and
+        silently returns no news for anything else. Taking the first token keeps
+        both call styles working.
+        """
+        return (query or "").strip().split()[0] if (query or "").strip() else ""
+
     def fetch(self, query: str, start: Optional[str] = None,
               end: Optional[str] = None, limit: int = 10) -> List[NewsArticle]:
         import yfinance as yf
 
+        symbol = self._symbol(query)
+        if not symbol:
+            return []
         try:
-            items = yf.Ticker(query).news or []
+            items = yf.Ticker(symbol).news or []
         except Exception:
             items = []
         return self._parse(items)[:limit]

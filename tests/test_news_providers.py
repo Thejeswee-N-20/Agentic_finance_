@@ -105,3 +105,21 @@ def test_get_headlines_uses_provider():
                     for i in range(3)]
     titles = get_headlines("NVDA", provider=StubProvider())
     assert titles == ["NVDA headline 0", "NVDA headline 1", "NVDA headline 2"]
+
+
+def test_yahoo_reduces_free_text_query_to_symbol():
+    """Callers phrase queries for a search API; yf.Ticker needs the bare symbol."""
+    from agentic_finance.news.yahoo import YahooNewsProvider
+
+    assert YahooNewsProvider._symbol("AAPL stock") == "AAPL"
+    assert YahooNewsProvider._symbol("RELIANCE.NS stock news") == "RELIANCE.NS"
+    assert YahooNewsProvider._symbol("  MSFT  ") == "MSFT"
+    assert YahooNewsProvider._symbol("AAPL") == "AAPL"
+    assert YahooNewsProvider._symbol("") == ""
+    assert YahooNewsProvider._symbol(None) == ""
+
+
+def test_yahoo_empty_query_returns_no_articles():
+    from agentic_finance.news.yahoo import YahooNewsProvider
+
+    assert YahooNewsProvider().fetch("") == []
